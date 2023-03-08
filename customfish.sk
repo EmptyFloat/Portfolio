@@ -1,0 +1,35 @@
+options:
+  
+  Prefix: &b&lDreamtech
+
+
+#IMPORTS FISHING EVENTS
+import:
+    org.bukkit.event.player.PlayerFishEvent
+    org.bukkit.event.player.PlayerFishEvent$State
+
+#CHANGES THE ACTUAL FISH LOOT
+on PlayerFishEvent:
+    event.getState() is State.CAUGHT_FISH
+    set {_event} to event.getCaught()
+    set {_item} to random element out of {customfish::*}
+    set item of {_event} to {_item}
+
+#OPENS AN INVENTORY TO CHANGE FISHING LOOT
+command /setcustomfishing:
+  permission: custom.fishing
+  trigger:
+    set {_invslot} to 0
+    open chest inventory with 6 rows named "&6Custom Fishing Drops" to player
+
+    loop {customfish::*}:
+      set slot {_invslot} of player's current inventory to loop-value
+      add 1 to {_invslot}
+
+    while name of current inventory of player is "&6Custom Fishing Drops":
+      delete {_inventory::*}
+      set {_inventory::*} to items in player's current inventory
+      wait 1 tick
+    
+    delete {customfish::*}
+    set {customfish::*} to {_inventory::*}
