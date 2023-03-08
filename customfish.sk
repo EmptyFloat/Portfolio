@@ -17,7 +17,7 @@ on PlayerFishEvent:
 
 #OPENS AN INVENTORY TO CHANGE FISHING LOOT
 command /setcustomfishing:
-  permission: custom.fishing
+  permission: customfishing
   trigger:
     set {_invslot} to 0
     open chest inventory with 6 rows named "&6Custom Fishing Drops" to player
