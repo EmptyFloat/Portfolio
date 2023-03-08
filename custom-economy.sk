@@ -1,0 +1,135 @@
+options:
+  Prefix: &b&lDreamtech
+  
+  #Permissions
+  Economy: Dreamtech.command.economy
+  RefreshTops: Dreamtech.refreshtops
+
+
+on join:
+  if {balance::%player's uuid%} is not set:
+    set {balance::%player's uuid%} to 0
+  if {crystal::%player's uuid%} is not set:
+    set {crystal::%player's uuid%} to 0
+
+
+command /eco <text> <offline player> <number>:
+  aliases: /economy
+  permission: {@Economy}
+  trigger:
+
+    if arg-1 is "set":
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &7Set %arg-2%&7's Balance To &6$%format(arg-3)%")
+      set {balance::%arg-2's uuid%} to arg-3
+
+    if arg-1 is "add":
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &7Added &6$%format(arg-3)%&7 To %arg-2%&7's Balance")
+      add arg-3 to {balance::%arg-2's uuid%}
+
+    if arg-1 is "remove":
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &7Removed &6$%format(arg-3)% &7From %arg-2%&7's Balance")
+      remove arg-3 from {balance::%arg-2's uuid%}
+
+
+command /crystal <text> <offline player> <number>:
+  permission: {@Economy}
+  trigger:
+
+    if arg-1 is "set":
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &7Set %arg-2%&7's Crystals To &5✦%format(arg-3)%")
+      set {crystal::%arg-2's uuid%} to arg-3
+
+    if arg-1 is "add":
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &7Added &5✦%format(arg-3)% &7To %arg-2%&7's Crystals")
+      add arg-3 to {crystal::%arg-2's uuid%}
+
+    if arg-1 is "remove":
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &7Removed &5✦%format(arg-3)% &7From %arg-2%&7's Crystals")
+      remove arg-3 from {crystal::%arg-2's uuid%}
+
+
+command /pay <player> <number>:
+  trigger:
+    
+    if {balance::%player's uuid%} >= arg-2:
+      if arg-2 > 0:
+
+        add arg-2 to {balance::%arg-1's uuid%}
+        remove arg-2 from {balance::%player's uuid%}
+        Sound_Action(player, "entity.experience_orb.pickup", "&6Paid $%format(arg-2)% &6To %arg-1%")
+        Sound_Action(arg-1, "entity.experience_orb.pickup", "&6Paid $%format(arg-2)% &6By %player%")
+      
+      else:
+        Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &cThe payment must be greater than 1.")
+    else:
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &cYou do not have enough balance for this.")
+
+
+command /crystalpay <player> <number>:
+  trigger:
+    
+    if {Crystal::%player's uuid%} >= arg-2:
+      if arg-2 > 0:
+
+        add arg-2 to {Crystal::%arg-1's uuid%}
+        remove arg-2 from {Crystal::%player's uuid%}
+        Sound_Action(player, "entity.experience_orb.pickup", "&5Paid ✦%format(arg-2)% &5To %arg-1%")
+        Sound_Action(arg-1, "entity.experience_orb.pickup", "&5Paid ✦%format(arg-2)% &5By %player%")
+      
+      else:
+        Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &cThe payment must be greater than 1.")
+    else:
+      Sound_Text(player, "entity.experience_orb.pickup", "{@Prefix} &8>> &cYou do not have enough Crystals for this.")
+
+
+on tab complete of "/eco", "/economy", "/crystal":
+  set tab completions for position 1 to "set", "add" and "remove"
+  set tab completions for position 2 to offline players
+
+
+function refresh_tops():
+  set {balancetop} to ""
+  set {crystaltop} to ""
+
+  set {_x} to 1
+  loop sorted indices of {balance::*} in descending order:
+    set {balancetop} to "%{balancetop}%%nl%&7%{_x}% &8- &7%loop-value parsed as offline player% &8» &6$%format({balance::%loop-value%})%"
+    add 1 to {_x}
+    if {_x} is 11:
+      stop loop
+
+  set {_x} to 1
+  loop sorted indices of {crystal::*} in descending order:
+    set {crystaltop} to "%{crystaltop}%%nl%&7%{_x}% &8- &7%loop-value parsed as offline player% &8» &5✦%format({crystal::%loop-value%})%"
+    add 1 to {_x}
+    if {_x} is 11:
+      stop loop
+      
+
+
+
+command /crystaltop:
+  trigger:
+    send "&5&l&nCRYSTAL TOP"
+    send "%{crystaltop}%" to player
+
+
+command /baltop:
+  aliases: /balancetop
+  trigger:
+    send "&6&l&nBALANCE TOP"
+    send "%{balancetop}%" to player
+
+
+command /refreshtops:
+  permission: {@RefreshTops}
+  trigger:
+    broadcast "{@Prefix} &8>> &cLeaderboards Are Reloading..."
+    wait 2 seconds
+    refresh_tops()
+
+
+every 15 minutes:
+  broadcast "{@Prefix} &8>> &cLeaderboards Are Reloading..."
+  wait 2 seconds
+  refresh_tops()
