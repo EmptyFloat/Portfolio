@@ -1,0 +1,57 @@
+options:
+  Stackable: &b&lDreamtech
+
+
+command /rtp:
+  trigger:
+
+    set {_cord} to "%player's x-coordinate%,%player's y-coordinate%,%player's z-coordinate%"
+    set {_time} to 6
+    while "%player's x-coordinate%,%player's y-coordinate%,%player's z-coordinate%" is {_cord}:
+      remove 1 from {_time}
+      if {_time} is 0:
+        Sound_Action(player, "block.note_block.bass", "&eFetching Location...")
+        wait 5 ticks
+        rtpTeleport(player)
+        stop
+      else:
+        Sound_Action(player, "entity.experience_orb.pickup", "&6Teleporting in &e%{_time}%&e seconds.")
+        wait 1 second
+    Sound_Action(player, "entity.villager.hurt", "&cOops! You moved...")
+    
+
+function rtpTeleport(player:player):
+  apply blindness to {_player} for 10 seconds
+  set {_loc} to rtpLocation()
+  if checkrtpLocation({_loc}) is true:
+    set {_x} to {_loc}'s x-coordinate
+    set {_z} to {_loc}'s z-coordinate
+    teleport {_player} to {_loc}
+    Sound_Title({_player}, "block.note_block.bell", "&6Successfully Teleported!", "&e%{_x}%&e, 4, %{_z}%")
+    wait 10 ticks
+    remove blindness from {_player}
+  else:
+    wait 1 second
+    Sound_Action({_player}, "block.note_block.bass", "&eFetching Location...")
+    rtpTeleport({_player})
+
+
+function rtpLocation() :: location:
+  set {_x} to round(random number between -167 and 200)
+  set {_z} to round(random number between -39 and 328)
+  set {_loc} to location at ({_x}, 4, {_z}) in world "GenMap" parsed as world
+  set {_block} to block at {_loc}
+  return {_block}
+
+function checkrtpLocation(location:location) :: boolean:
+  if block at {_location} is air:
+    if block above {_location} is air:
+      set {_x} to {_location}'s x-coordinate
+      set {_z} to {_location}'s z-coordinate
+      set {_loc} to location at ({_x}, 19, {_z}) in world "GenMap" parsed as world
+      if block at {_loc} is air:
+        if {_x} is not between -23 and 56:
+          if {_y} is not between 104 and 168:
+            return true
+            stop
+  return false
