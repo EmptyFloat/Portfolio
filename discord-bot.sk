@@ -1,0 +1,22 @@
+options:
+
+  Prefix: &b&lDreamtech
+  BotName: DreamTech
+  BotToken: (BOT TOKEN)
+
+
+define new bot named "{@BotName}":
+  token: "{@BotToken}"
+  intents: default intents
+  on guild ready:
+    send " " to console
+    send "{@BotName} >> Loading Bot!" to console
+    send " " to console
+ 
+    send " " to console
+    send "{@BotName} >> Loading Commands!" to console
+    send " " to console
+  on ready:
+    send " " to console
+    send "{@BotName} >> Finished Bot!" to console
+    send " " to console
